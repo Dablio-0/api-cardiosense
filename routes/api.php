@@ -28,8 +28,8 @@ Route::post('register', [AuthController::class, 'register'])->name('register');
 
 /* Recover Password (User Not Logged) */
 Route::post('password/reset/code', [AuthController::class, 'sendPasswordResetCode'])->name('sendPasswordResetCode');
-Route::post('password/reset', [AuthController::class, 'resetPasswordWithCode'])->name('resetPasswordWithCode');
-
+Route::post('password/reset/code/verify', [AuthController::class, 'verifyResetCode'])->name('verifyResetCode');
+Route::post('password/reset/confirm', [AuthController::class, 'resetPassword'])->name('resetPassword');
 
 /* With Middleware (Autentication) */
 Route::group(['middleware' => ['auth:sanctum']], function(){

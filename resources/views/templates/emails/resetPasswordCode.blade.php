@@ -19,24 +19,24 @@
         .email-content {
             max-width: 600px;
             margin: 0 auto;
-            background-color: #9ADAFF;
+            background-color: #00AEEF;
             border-radius: 8px;
             padding: 40px;
             text-align: center;
         }
         .email-header {
-            font-size: 24px;
+            font-size: 25px;
             color: #FFFFFF;
             margin-bottom: 20px;
         }
         .email-body {
-            font-size: 16px;
-            color: #333333;
+            font-size: 30px;
+            color: #FFFFFF;
             line-height: 1.6;
         }
         .code-box {
             background-color: #FFFFFF;
-            color: #9ADAFF;
+            color: #00AEEF;
             font-size: 20px;
             font-weight: bold;
             padding: 10px;
@@ -45,13 +45,13 @@
             display: inline-block;
         }
         .email-footer {
-            font-size: 12px;
-            color: #666666;
+            font-size: 20px;
+            color: #FFFFFF;
             margin-top: 30px;
         }
         .btn-reset {
             background-color: #FFFFFF;
-            color: #9ADAFF;
+            color: #00AEEF;
             text-decoration: none;
             font-size: 16px;
             font-weight: bold;
@@ -61,7 +61,7 @@
             display: inline-block;
         }
         .btn-reset:hover {
-            background-color: #e0f3ff;
+            background-color: #00AEEF;
         }
     </style>
 </head>
@@ -80,8 +80,11 @@
             <a href="{{ $url }}" class="btn-reset">Redefinir Senha</a>
             <p class="email-footer">
                 Obrigado,<br>
-                Equipe de Suporte
+                Sistema de Suporte <br>
             </p>
+            <br>
+            <img src="{{ asset('images/logo.jpeg') }}" alt="Logo" width="100">
+            <h3 class="email-header">CardioSense - Precisão a Cada Batida</h3>
         </div>
     </div>
 </body>

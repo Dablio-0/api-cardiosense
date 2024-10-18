@@ -13,12 +13,16 @@ class ResetPasswordCode extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $code;
+    public $url;
+
     /**
      * Create a new message instance.
      */
-    public function __construct()
+    public function __construct($code, $url)
     {
         $this->code = $code;
+        $this->url = $url;
     }
 
     /**
@@ -27,7 +31,7 @@ class ResetPasswordCode extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Código de Redefinição de Senha - CardioSense - Precisão a Cada Batida',
+            subject: 'Código de Redefinição de Senha - CardioSense',
         );
     }
 
