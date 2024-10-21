@@ -34,6 +34,7 @@ Route::post('password/reset/confirm', [AuthController::class, 'resetPassword'])-
 
 
 /* RRoutes ESP (Not Logged) */
+Route::get('test/esp', [ESPController::class, 'testCommunicationESP'])->name('testCommunicationESP');
 Route::get('data/esp', [ESPController::class, 'getDataESP'])->name('getDataESP');
 
 
