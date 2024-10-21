@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 /* Import Controller Classes */
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ESPController;
 
 /* Test Routes */
 Route::get('/', function () {
@@ -30,6 +31,11 @@ Route::post('register', [AuthController::class, 'register'])->name('register');
 Route::post('password/reset/code', [AuthController::class, 'sendPasswordResetCode'])->name('sendPasswordResetCode');
 Route::post('password/reset/code/verify', [AuthController::class, 'verifyResetCode'])->name('verifyResetCode');
 Route::post('password/reset/confirm', [AuthController::class, 'resetPassword'])->name('resetPassword');
+
+
+/* RRoutes ESP (Not Logged) */
+Route::get('data/esp', [ESPController::class, 'getDataESP'])->name('getDataESP');
+
 
 /* With Middleware (Autentication) */
 Route::group(['middleware' => ['auth:sanctum']], function(){

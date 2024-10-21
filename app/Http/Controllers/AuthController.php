@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Carbon;
 
 
 class AuthController extends Controller
@@ -31,7 +32,7 @@ class AuthController extends Controller
             $request->validate([
                 'name' => 'required|string',
                 'email' => 'required|email|unique:users',
-                'date_birth' => 'required|date',
+                'date_birth' => ['required', 'date', 'date_format:d/m/Y'],
                 'sex' => ['required', 'in:' . implode(',', User::$arraySex)],
                 'password' => 'required|string|confirmed',
                 'password_confirmation' => 'required|string'
@@ -40,7 +41,7 @@ class AuthController extends Controller
             $user = new User();
             $user->name = $request->name;
             $user->email = $request->email;
-            $user->date_birth = $request->date_birth;
+            $user->date_birth = Carbon::parse($request->date_birth)->format('Y-m-d');
             $user->sex = $request->sex;
             $user->password = Hash::make($request->password);
             $user->save();
