@@ -26,7 +26,7 @@ class User extends Authenticatable
         'date_birth'
     ];
 
-    public static $arraySex = ['MALE', 'FEMALE', 'OTHER'];
+    public static $arraySex = ['FATHER', 'MOTHER', 'SPOUSE', 'CHILD', 'GRANDPARENT', 'GRANDCHILD'];
 
     public static function getArraySex(){
         return self::$arraySex;
@@ -53,5 +53,20 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /* Relations */
+
+    // Module Family Management
+    public function familyRelationships(){
+        return $this->hasMany(FamilyRelationships::class, 'user_id');
+    }
+
+    public function familyRelationshipsRelated(){
+        return $this->hasMany(FamilyRelationships::class, 'user_related_id');
+    }
+
+    public function families(){
+        return $this->hasOne(Family::class, 'user_adm_id');
     }
 }
