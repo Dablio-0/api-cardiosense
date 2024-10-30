@@ -34,11 +34,11 @@ Route::post('password/reset/confirm', [AuthController::class, 'resetPassword'])-
 
 
 /* RRoutes ESP (Not Logged) */
-Route::get('test/esp', [ESPController::class, 'testCommunicationESP'])->name('testCommunicationESP');
-Route::get('data/esp', [ESPController::class, 'getDataESP'])->name('getDataESP');
+Route::get('test/esp/get', [ESPController::class, 'testCommunicationESPGET'])->name('testCommunicationESPGET');
+Route::post('test/esp/post', [ESPController::class, 'testCommunicationESPPOST'])->name('testCommunicationESPPOST');
 
 
-/* With Middleware (Autentication) */
+/* With Middleware (Autenticatio    n) */
 Route::group(['middleware' => ['auth:sanctum']], function(){
 
     Route::post('logout/{user}', [AuthController::class, 'logout'])->name('logout');

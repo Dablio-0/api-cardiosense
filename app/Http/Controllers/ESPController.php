@@ -8,8 +8,24 @@ use Illuminate\Http\JsonResponse;
 class ESPController extends Controller
 {
 
-    public function testCommunicationESP() : JsonResponse {
+    /**
+     * Test the communication with ESP32 using GET method
+     * 
+     * @return \Illuminate\Http\JsonResponse Class of Response
+     */
+    public function testCommunicationESPGET() : JsonResponse{
         return response()->json(['message' => 'Comunicação com ESP32 realizada com sucesso'], 200);
+
+    }
+
+    /**
+     * Test the communication with ESP32 using POST method
+     * 
+     * @return \Illuminate\Http\JsonResponse Class of Response
+     */
+    public function testCommunicationESPPOST() : JsonResponse{
+        return response()->json(['message' => 'Comunicação com ESP32 realizada com sucesso'], 200);
+    
     }
     
     /**
