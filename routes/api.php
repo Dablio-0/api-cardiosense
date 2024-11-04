@@ -36,6 +36,7 @@ Route::post('password/reset/confirm', [AuthController::class, 'resetPassword'])-
 /* RRoutes ESP (Not Logged) */
 Route::get('test/esp/get', [ESPController::class, 'testCommunicationESPGET'])->name('testCommunicationESPGET');
 Route::post('test/esp/post', [ESPController::class, 'testCommunicationESPPOST'])->name('testCommunicationESPPOST');
+Route::post('esp/data/receive', [ESPController::class, 'getDataESP'])->name('getDataESP');
 
 
 /* With Middleware (Autenticatio    n) */
@@ -44,5 +45,16 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::post('logout/{user}', [AuthController::class, 'logout'])->name('logout');
     Route::get('verifyLoginActive', [AuthController::class, 'verifyLoginActive'])->name('verifyLoginActive');
     Route::get('users', [UserController::class, 'index'])->name('users');
-});
 
+    Route::prefix('family')->name('family.')->controller(FamilyController::class)->group(function(){
+        
+        Route::post('/create', 'store')->name('store');
+        Route::get('/{family}', 'retrieve')->name('show');
+        Route::put('/{family}', 'update')->name('update');
+        Route::delete('/{family}', 'delete')->name('destroy');
+
+        Route::post('/members/sync', 'syncFamilyMembers')->name('members.syncFamilyMembers');
+
+    });
+
+});

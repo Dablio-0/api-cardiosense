@@ -31,29 +31,36 @@ class ESPController extends Controller
     /**
      * Get the data sent by the ESP32
      * 
+     * [POST (from ESP32)]
+     * 
      * @param Request $request Request data from ESP32
      * @return \Illuminate\Http\JsonResponse Class of Response
      */
     public function getDataESP(Request $request) : JsonResponse{
         
-        // Checks if teh request has the JSON data
-        if($request->has('data')) {
-            $data = $request->input('data');
-            $this->saveDataBPMonRedis($data);
-            return response()->json(['message' => 'Dados salvos com sucesso'], 200);
-        }
+        try {
+            // Checks if teh request has the JSON data
+            if($request->has('data')) {
+                $data = $request->input('data');
+                $this->saveDataBPMonRedis($data);
+                return response()->json(['message' => 'Dados salvos com sucesso!'], 200);
+            } else {
+                return response()->json(['message' => 'Dados não encontrados ou não salvos.'], 404);
+            }
 
-        return response()->json(['message' => 'Dados não encontrados'], 404);
+        } catch (\Expection $e) {
+            return response()->json(['message' => 'Erro no Servidor!'], 500);
+        }
     }
 
     /**
-     * SAve the data of BPMs per second on Redis Database
+     * Save the data of BPMs per second on Redis Database
      * 
      * @param array $data
      * @return void
      */
     public function saveDataBPMonRedis($data) : void {
 
-        // 
+        
     }
 }
