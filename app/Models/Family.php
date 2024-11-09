@@ -24,4 +24,8 @@ class Family extends Model
     public function familyRelationships(){
         return $this->hasMany(FamilyRelationships::class, 'family_id');
     }
+
+    public function userBPMHistory(){
+        return $this->hasMany(UserBPMHistory::class, 'family_id');
+    }
 }

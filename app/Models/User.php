@@ -26,10 +26,25 @@ class User extends Authenticatable
         'date_birth'
     ];
 
-    public static $arraySex = ['FATHER', 'MOTHER', 'SPOUSE', 'CHILD', 'GRANDPARENT', 'GRANDCHILD'];
+    public static $arraySex = ['MALE', 'FEMALE', 'OTHER'];
+    public static $arrayParentRelation = ['FATHER', 'MOTHER', 'SPOUSE', 'CHILD', 'GRANDPARENT', 'GRANDCHILD'];
 
+    /**
+     * Retrieve the array of possible sex values.
+     *
+     * @return array The list of sex options.
+     */
     public static function getArraySex(){
         return self::$arraySex;
+    }
+
+    /**
+     * Retrieve the array of possible parent relation values.
+     *
+     * @return array The list of parent relations options
+     */
+    public static function getArrayParentRelation(){ 
+        return self::$arrayParentRelation;
     }
 
     /**
@@ -64,6 +79,10 @@ class User extends Authenticatable
 
     public function familyRelationshipsRelated(){
         return $this->hasMany(FamilyRelationships::class, 'user_related_id');
+    }
+
+    public function userBPMHistories(){
+        return $this->hasMany(UserBPMHistory::class, 'user_id');
     }
 
     public function families(){
