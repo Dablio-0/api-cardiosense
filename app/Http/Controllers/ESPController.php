@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UserBPMHistory;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class ESPController extends Controller
 {
@@ -40,27 +44,91 @@ class ESPController extends Controller
         
         try {
             // Checks if teh request has the JSON data
-            if($request->has('data')) {
-                $data = $request->input('data');
-                $this->saveDataBPMonRedis($data);
-                return response()->json(['message' => 'Dados salvos com sucesso!'], 200);
+            if($request->has('bpm')) {
+                
+                $bpm = $request->bpm;
+
+                $this->saveDataBPMonRedis($bpm);
+                return response()->json([
+                    'message' => 'Dados salvos no redis com sucesso!',
+                    'data' => [
+                        'bpm' => $bpm ?? null
+                    ],
+            ], 200);
+            
             } else {
                 return response()->json(['message' => 'Dados não encontrados ou não salvos.'], 404);
             }
 
-        } catch (\Expection $e) {
+        } catch (\Exception $e) {
             return response()->json(['message' => 'Erro no Servidor!'], 500);
         }
     }
 
     /**
-     * Save the data of BPMs per second on Redis Database
+     * Save the data of BPMs per second on Redis and calculate the average BPM per minute
      * 
      * @param array $data
      * @return void
      */
-    public function saveDataBPMonRedis($data) : void {
+    public function saveDataBPMonRedis($bpm) : void {
 
-        
+        Cache::put('bpm', $bpm, 1);
+
+        // Save BPMs in an array for minute average calculation
+        $minuteBPMs = Cache::get('minute_bpms', []);
+        $minuteBPMs[] = $bpm;
+
+        // If we have 8 BPM readings (one per 15 seconds per minute in 2 minutes), calculate the average and save to MySQL
+        if (count($minuteBPMs) >= 4) {
+            $averageBPM = array_sum($minuteBPMs) / count($minuteBPMs);
+
+            // Get min and max bpm on this interval
+            $maxBPM = max($minuteBPMs);
+            $minBPM = min($minuteBPMs);
+
+            $this->saveAverageBPMToMySQL($averageBPM, $maxBPM, $minBPM);
+            // // Reset the array for the next minute
+            // $minuteBPMs = [];
+        }
+
+        // Save the updated array back to Redis
+        Cache::put('minute_bpms', $minuteBPMs, 60);
+    }
+
+    /**
+     * Save the average BPM to MySQL database   
+
+     * 
+     * @param float $averageBPM Average BPM per minute
+     * @param float $maxBPM Max BPM per minute
+     * @param float $minBPM Min BPM per minute
+     * @return void
+     */
+    public function saveAverageBPMToMySQL($averageBPM, $maxBPM, $minBPM) : void {
+
+        // Save the average BPM from Redis data to MySQL
+        if(Auth::check()) {
+            $user = Auth::user();
+
+            $averageRegistry = new UserBPMHistory();
+
+            $averageRegistry->bpm_interval_average = $averageBPM;
+            $averageRegistry->bpm_interval_max = $maxBPM;
+            $averageRegistry->bpm_interval_min = $minBPM;
+            $averageRegistry->user_id = $user->id;
+            
+            // Check if the user is related in the familyRelationships table
+            $familyRelationship = DB::table('familyRelationships')
+                ->where('user_id', $user->id)
+                ->orWhere('user_related_id', $user->id)
+                ->first();
+
+            if ($familyRelationship) {
+                $averageRegistry->family_id = $familyRelationship->family_id;
+            }
+
+            $averageRegistry->save();
+        }
     }
 }

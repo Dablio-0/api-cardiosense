@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -78,9 +81,10 @@ class UserController extends Controller
             
             $request->validate([
                 'name' => 'required|string',
-                'email' => 'required|email',
-                'date_birth' => 'required|date',
-                'sex' => ['required', 'in' . implode(',', User::$arraySex)]
+                'email' => 'required|email|unique:users',
+                'date_birth' => ['required', 'date', 'date_format:d/m/Y'],
+                'sex' => ['required', Rule::in(User::$arraySex)],
+                'imageProfile' => 'nullable|string'
             ]);
     
             $user = User::find($id);
@@ -90,6 +94,7 @@ class UserController extends Controller
                 $user->email = $request->email;
                 $user->date_birth = $request->date_birth;
                 $user->sex = $request->sex;
+                $user->imageProfile = $request->imageProfile;
 
                 $user->save();
 

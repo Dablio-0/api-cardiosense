@@ -6,6 +6,9 @@ use App\Models\Family;
 use App\Models\FamilyRelationships;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class FamilyController extends Controller
 {
@@ -49,19 +52,44 @@ class FamilyController extends Controller
      */
     public function syncFamilyMembers(Request $request) : JsonResponse
     {
-        $request->validate([
+        try {
+            $request->validate([
             'members' => 'required|array',
             'members.*.user_id' => 'required|exists:users,id',
             'members.*.relationship' => ['required', Rule::in(User::getArraySex())],
             'family_id' => 'required|exists:families,id',
             'action' => 'required|in:ADD,REMOVE'
-        ]);
+            ]);
 
-        $user = Auth::user();
+            $user = Auth::user();
 
-        $family = Family::find($request->family_id);
+            $family = Family::find($request->family_id);
 
-        switch ($request->action) {
+            // Verify if the authenticated user is the administrator of the family
+            if ($user->id != $family->user_adm_id) {
+            return response()->json(['error' => 'You are not the administrator of this family'], 403);
+            }
+
+            // Verify if the family exists
+            if (!$family) {
+            return response()->json(['error' => 'Family not found'], 404);
+            }
+
+            // Verificar se realmente os usuários membros enviados são da família
+            foreach ($request->members as $member) {
+            if (!User::where('id', $member['user_id'])->exists()) {
+                return response()->json(['error' => 'Member not found'], 404);
+            }
+            }
+
+            // Verify if the user is already in the family
+            foreach ($request->members as $member) {
+                if (FamilyRelationships::where('user_id', $member['user_id'])->where('family_id', $family->id)->exists()) {
+                    return response()->json(['error' => 'User already in the family'], 403);
+                }
+            }
+
+            switch ($request->action) {
             case 'ADD':
                 $this->addMembers($family, $request);
                 break;
@@ -70,7 +98,10 @@ class FamilyController extends Controller
                 break;
             default:
                 return response()->json(['error' => 'Invalid action'], 400);
-        }   
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to sync family members', 'message' => $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -84,14 +115,14 @@ class FamilyController extends Controller
      * @param \App\Models\Family $family The family that the members will be added
      * @return \Illuminate\Http\JsonResponse class of response type
      */
-    public function addMembers(Family $family, User $members) : JsonResponse
+    public function addMembers(Family $family, $members) : JsonResponse
     {
         dd($family, $members);
         try {
         
             $user = Auth::user();
 
-            foreach ($request->members as $member) {
+            foreach ($members as $member) {
                 $familyRelationship = new FamilyRelationships();
 
                 $familyRelationship->user_id = $user->id;
@@ -119,14 +150,14 @@ class FamilyController extends Controller
      * @param \App\Models\Family $family The family that the members will be removed
      * @return \Illuminate\Http\JsonResponse class of response type
      */
-    public function removeMembers(Request $request, Family $family) : JsonResponse
+    public function removeMembers(Family $family, $members) : JsonResponse
     {
-        dd($request, $family);
+        dd($family, $members);
         try {
 
             $user = Auth::user();
 
-            foreach ($request->members as $member) {
+            foreach ($members as $member) {
                 $familyRelationship = new FamilyRelationships();
 
                 $relation = $familyRelationship->where('user_id', $user->id)
