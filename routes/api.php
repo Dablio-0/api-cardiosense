@@ -38,11 +38,13 @@ Route::post('password/reset/confirm', [AuthController::class, 'resetPassword'])-
 /* Rotas ESP (Não Logado) */
 Route::get('test/esp/get', [ESPController::class, 'testCommunicationESPGET'])->name('testCommunicationESPGET');
 Route::post('test/esp/post', [ESPController::class, 'testCommunicationESPPOST'])->name('testCommunicationESPPOST');
-Route::post('esp/data/receive', [ESPController::class, 'getDataESP'])->name('getDataESP');
+Route::get('esp/generate-token', [ESPController::class, 'generateEspToken'])->name('generateEspToken');
 
 
 /* Com Middleware (Autenticação) */
 Route::group(['middleware' => ['auth:sanctum']], function () {
+
+    Route::post('esp/data/receive', [ESPController::class, 'getDataESP'])->name('getDataESP');
 
     Route::post('logout/{user}', [AuthController::class, 'logout'])->name('logout');
     Route::get('verifyLoginActive', [AuthController::class, 'verifyLoginActive'])->name('verifyLoginActive');

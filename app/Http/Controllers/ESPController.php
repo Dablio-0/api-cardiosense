@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\UserBPMHistory;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
@@ -30,6 +31,19 @@ class ESPController extends Controller
     public function testCommunicationESPPOST() : JsonResponse{
         return response()->json(['message' => 'Comunicação com ESP32 realizada com sucesso'], 200);
     
+    }
+
+    public function generateEspToken(Request $request)
+    {
+        $user = User::where('email', 'esp32@exemplo.com')->first();
+
+        if (!$user) {
+            return response()->json(['status' => false, 'message' => 'Usuário ESP32 não encontrado.'], 404);
+        }
+
+        $token = $user->createToken('ESP32-Access-Token')->plainTextToken;
+
+        return response()->json(['status' => true, 'token' => $token]);
     }
     
     /**
@@ -73,7 +87,9 @@ class ESPController extends Controller
      */
     public function saveDataBPMonRedis($bpm) : void {
 
-        Cache::put('bpm', $bpm, 1);
+        var_dump($bpm);
+
+        Cache::put('bpm', $bpm, 5);
 
         // Save BPMs in an array for minute average calculation
         $minuteBPMs = Cache::get('minute_bpms', []);
@@ -87,7 +103,7 @@ class ESPController extends Controller
             $maxBPM = max($minuteBPMs);
             $minBPM = min($minuteBPMs);
 
-            $this->saveAverageBPMToMySQL($averageBPM, $maxBPM, $minBPM);
+            // $this->saveAverageBPMToMySQL($averageBPM, $maxBPM, $minBPM);
             // // Reset the array for the next minute
             // $minuteBPMs = [];
         }
@@ -109,7 +125,11 @@ class ESPController extends Controller
 
         // Save the average BPM from Redis data to MySQL
         if(Auth::check()) {
+
+            var_dump("Authcheck");
             $user = Auth::user();
+
+            var_dump($user->name);
 
             $averageRegistry = new UserBPMHistory();
 
@@ -129,6 +149,32 @@ class ESPController extends Controller
             }
 
             $averageRegistry->save();
+        } else {
+            // Check for token in localStorage
+            $token = request()->bearerToken();
+            if ($token) {
+                $user = DB::table('users')->where('api_token', $token)->first();
+                if ($user) {
+                    $averageRegistry = new UserBPMHistory();
+
+                    $averageRegistry->bpm_interval_average = $averageBPM;
+                    $averageRegistry->bpm_interval_max = $maxBPM;
+                    $averageRegistry->bpm_interval_min = $minBPM;
+                    $averageRegistry->user_id = $user->id;
+                    
+                    // Check if the user is related in the familyRelationships table
+                    $familyRelationship = DB::table('familyRelationships')
+                        ->where('user_id', $user->id)
+                        ->orWhere('user_related_id', $user->id)
+                        ->first();
+
+                    if ($familyRelationship) {
+                        $averageRegistry->family_id = $familyRelationship->family_id;
+                    }
+
+                    $averageRegistry->save();
+                }
+            }
         }
     }
 }
