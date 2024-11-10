@@ -48,7 +48,8 @@ class AuthController extends Controller
 
             return response()->json([
                 'status' => true,
-                'message' => 'User created'
+                'message' => 'User created',
+                'user' => $user
             ], 201);
 
         } catch (ValidationException $e) {
@@ -176,7 +177,7 @@ class AuthController extends Controller
             $resetCode = random_int(100000, 999999);
 
             // Gera a URL para resetar a senha
-            $url = 'http://localhost:8080/reset-password?email=' . $user->email . '&reset_code=' . $resetCode;
+            $url = 'http://localhost:8010/front-cardiosense/views/login/codigo.php?email=' . $user->email;
 
             // Recupera os códigos de redefinição de senha armazenados no cache
             $resetCodes = Cache::get('password_reset_codes_' . $user->id, []);
