@@ -61,7 +61,9 @@
             display: inline-block;
         }
         .btn-reset:hover {
-            background-color: #00AEEF;
+            background-color: #007acc; /* Cor de fundo no hover */
+            color: #ffffff; /* Mantém o texto branco */
+            text-decoration: none; /* Garante que não aparece sublinhado */
         }
     </style>
 </head>
