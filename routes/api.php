@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\FamilyController;
+use App\Http\Controllers\MonitorController;
 use App\Http\Controllers\ESPController;
 
 /* Rotas de Teste */
@@ -39,12 +40,12 @@ Route::post('password/reset/confirm', [AuthController::class, 'resetPassword'])-
 Route::get('test/esp/get', [ESPController::class, 'testCommunicationESPGET'])->name('testCommunicationESPGET');
 Route::post('test/esp/post', [ESPController::class, 'testCommunicationESPPOST'])->name('testCommunicationESPPOST');
 Route::get('esp/generate-token', [ESPController::class, 'generateEspToken'])->name('generateEspToken');
+Route::post('esp/data/receive', [ESPController::class, 'getDataESP'])->name('getDataESP');
 
 
 /* Com Middleware (Autenticação) */
 Route::group(['middleware' => ['auth:sanctum']], function () {
 
-    Route::post('esp/data/receive', [ESPController::class, 'getDataESP'])->name('getDataESP');
 
     Route::post('logout/{user}', [AuthController::class, 'logout'])->name('logout');
     Route::get('verifyLoginActive', [AuthController::class, 'verifyLoginActive'])->name('verifyLoginActive');
@@ -63,6 +64,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         Route::delete('/{family}', 'delete')->name('destroy');
         
         Route::post('/members/sync', 'syncFamilyMembers')->name('members.syncFamilyMembers');
+    });
+
+    Route::prefix('monitor')->name('monitor.')->controller(MonitorController::class)->group(function () {
+        Route::get('data/bpm', 'getDataBPMFromRedis')->name('getDataBPMFromRedis');
     });
 
 });
