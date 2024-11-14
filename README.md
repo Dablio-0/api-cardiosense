@@ -195,3 +195,18 @@ The Laravel framework is open-sourced software licensed under the [MIT license](
 
 ## Team Members
 
+- Wellington de Elias Rodrigues (Backend, DBs, Infrastructure) [Dablio-0](https://github.com/Dablio-0)
+- Matheus Gonçalves Prado Ribeiro (Frontend, UI/UX) [MatheusCosta19](https://github.com/MatheusCosta19)
+- Leonardo Fontanive Tonet (Prototype and Embbeded System)[f0ntCODE](https://github.com/f0ntCODE)
+
+To see another information from other layers of the project, please visit the following repositories:
+
+- [Frontend](https://github.com/Dablio-0/front-cardiosense)
+- [Prototype](https://github.com/f0ntCODE/CardioSense_ESP32)
+
+## License
+
+This project is licensed under the MIT License
+
+This README.md file was created by [Dablio-0]
+
