@@ -79,38 +79,59 @@ class ESPController extends Controller
         }
     }
 
-    /**
-     * Save the data of BPMs per second on Redis and calculate the average BPM per minute
+   /**
+     * Save the data of BPMs per second on Redis and calculate the average BPM per minute.
      * 
-     * @param array $data
+     * @param int $bpm
      * @return void
      */
-    public function saveDataBPMonRedis($bpm) : void {
-
+    public function saveDataBPMonRedis(int $bpm): void {
+        
+        // Exibir o valor de bpm para depuração
         var_dump($bpm);
 
-        Cache::put('bpm', $bpm, 5);
+        // Salvar o último valor de bpm
+        Cache::put('bpm', $bpm, 60);
 
-        // Save BPMs in an array for minute average calculation
+        // Recupera o índice do minuto atual e incrementa para salvar a próxima entrada
+        $currentMinuteIndex = Cache::get('minute_index', 1);
+
+        // Salva os batimentos do minuto atual, criando um array para o minuto se não existir
         $minuteBPMs = Cache::get('minute_bpms', []);
-        $minuteBPMs[] = $bpm;
+        
+        // Converte o índice para inteiro para evitar que seja tratado como string
+        $currentMinuteIndex = (int) $currentMinuteIndex;
 
-        // If we have 8 BPM readings (one per 15 seconds per minute in 2 minutes), calculate the average and save to MySQL
-        if (count($minuteBPMs) >= 4) {
-            $averageBPM = array_sum($minuteBPMs) / count($minuteBPMs);
-
-            // Get min and max bpm on this interval
-            $maxBPM = max($minuteBPMs);
-            $minBPM = min($minuteBPMs);
-
-            // $this->saveAverageBPMToMySQL($averageBPM, $maxBPM, $minBPM);
-            // // Reset the array for the next minute
-            // $minuteBPMs = [];
+        // Inicializa o array para o índice do minuto, caso ainda não exista
+        if (!isset($minuteBPMs[$currentMinuteIndex])) {
+            $minuteBPMs[$currentMinuteIndex] = [];
         }
 
-        // Save the updated array back to Redis
+        // Adiciona o valor atual de BPM no minuto atual
+        $minuteBPMs[$currentMinuteIndex][] = $bpm;
+
+        // Se tivermos 4 leituras para este minuto, calculamos a média e salvamos no MySQL
+        if (count($minuteBPMs[$currentMinuteIndex]) >= 4) {
+            $averageBPM = array_sum($minuteBPMs[$currentMinuteIndex]) / count($minuteBPMs[$currentMinuteIndex]);
+
+            // Obtém o mínimo e máximo do intervalo de BPMs registrados
+            $maxBPM = max($minuteBPMs[$currentMinuteIndex]);
+            $minBPM = min($minuteBPMs[$currentMinuteIndex]);
+
+            // Salva a média no banco de dados (a função pode ser descomentada se já implementada)
+            // $this->saveAverageBPMToMySQL($averageBPM, $maxBPM, $minBPM);
+
+            // Incrementa o índice de minuto para o próximo grupo de batimentos
+            $currentMinuteIndex++;
+
+            // Salva o índice atualizado no cache para o próximo minuto
+            Cache::put('minute_index', $currentMinuteIndex, 60);
+        }
+
+        // Salva o array atualizado de batimentos por minuto no Redis
         Cache::put('minute_bpms', $minuteBPMs, 60);
     }
+
 
     /**
      * Save the average BPM to MySQL database   
